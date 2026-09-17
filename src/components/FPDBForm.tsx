@@ -37,6 +37,30 @@ export const FPDBForm: React.FC<FPDBFormProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState<number>(1);
 
+  // Top Header Metadata State (.:: FORMULIR PENGAJUAN DATABASE DEALER ::.)
+  const [nomorFpdb] = useState(
+    mode === 'EDIT' 
+      ? (existingDealer?.code ? `26.${existingDealer.code.slice(-5)}` : '26.00140') 
+      : '26.00150'
+  );
+  const [headerKategoriDealer, setHeaderKategoriDealer] = useState('-. TRADISIONAL');
+  const [headerCabang, setHeaderCabang] = useState(
+    mode === 'EDIT' 
+      ? '-. SURABAYA' 
+      : (salesman.branch?.toLowerCase().includes('surabaya') ? '-. SURABAYA' :
+         salesman.branch?.toLowerCase().includes('bandung') ? '-. BANDUNG' :
+         '-. PUSAT')
+  );
+  const [salesPersonName, setSalesPersonName] = useState(
+    mode === 'EDIT' 
+      ? (existingDealer?.assignedSalesman ? existingDealer.assignedSalesman.toUpperCase() : 'IRWAN WIDJAYA TJANDRA') 
+      : (salesman?.name ? salesman.name.toUpperCase() : 'YOGI DANIS FERMANA')
+  );
+  const [salesPersonNik, setSalesPersonNik] = useState(
+    mode === 'EDIT' ? '11744' : (salesman?.nik ? salesman.nik.replace(/\D/g, '') || '11744' : '11744')
+  );
+  const [showSalesPicker, setShowSalesPicker] = useState(false);
+
   // Step 1 State: Profil Toko
   const [storeName, setStoreName] = useState(existingDealer?.name || '');
   const [businessType, setBusinessType] = useState<BusinessType>(existingDealer?.businessType || 'PT');
@@ -178,57 +202,316 @@ export const FPDBForm: React.FC<FPDBFormProps> = ({
   return (
     <div style={{ width: '100%', padding: '1.5rem 2rem 3rem' }}>
       {/* Top Header Navigation */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
         <button
           type="button"
           onClick={onBack}
           className="btn-secondary"
-          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}
         >
-          <ArrowLeft size={16} /> Kembali ke Dashboard
+          <ArrowLeft size={15} /> Kembali ke Dashboard
         </button>
 
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
-            <span style={{
-              backgroundColor: mode === 'NEW' ? '#eff6ff' : '#fef3c7',
-              color: mode === 'NEW' ? '#1d4ed8' : '#92400e',
-              border: `1px solid ${mode === 'NEW' ? '#bfdbfe' : '#fde68a'}`,
-              padding: '0.2rem 0.6rem',
-              borderRadius: '6px',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-            }}>
-              {mode === 'NEW' ? 'PENGAJUAN DEALER BARU' : `PERUBAHAN DATA DEALER (SAP: ${existingDealer?.code})`}
-            </span>
-          </div>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#09090b', margin: '0.25rem 0 0' }}>
-            {mode === 'NEW' ? 'Formulir Pengajuan Database Dealer Baru (FPDB)' : `Update Data: ${existingDealer?.name}`}
-          </h1>
+        <div>
+          <span style={{
+            backgroundColor: mode === 'NEW' ? '#eff6ff' : '#fef3c7',
+            color: mode === 'NEW' ? '#1d4ed8' : '#92400e',
+            border: `1px solid ${mode === 'NEW' ? '#bfdbfe' : '#fde68a'}`,
+            padding: '0.2rem 0.6rem',
+            borderRadius: '4px',
+            fontSize: '0.725rem',
+            fontWeight: 700,
+          }}>
+            {mode === 'NEW' ? 'MODE: PENGAJUAN DEALER BARU' : `MODE: PERUBAHAN DATA DEALER (SAP: ${existingDealer?.code})`}
+          </span>
         </div>
       </div>
 
-      {/* Edit Mode Notification Banner */}
-      {mode === 'EDIT' && existingDealer && (
-        <div style={{
-          backgroundColor: '#eff6ff',
-          border: '1px solid #bfdbfe',
-          borderRadius: '8px',
-          padding: '0.85rem 1.25rem',
-          marginBottom: '1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.85rem'
-        }}>
-          <div style={{ backgroundColor: '#1d4ed8', color: '#ffffff', padding: '0.4rem', borderRadius: '6px' }}>
-            <TrendingUp size={18} />
+      {/* ========================================================================= */}
+      {/* OFFICIAL FORM HEADER :: .:: FORMULIR PENGAJUAN DATABASE DEALER ::.        */}
+      {/* ========================================================================= */}
+      <div style={{
+        backgroundColor: '#ffffff',
+        border: '1px solid #d4d4d8',
+        borderRadius: '6px',
+        padding: '1.25rem 1.5rem',
+        marginBottom: '1.25rem',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+      }}>
+        {/* Title Header */}
+        <div style={{ textAlign: 'center', margin: '0.25rem 0 1.15rem' }}>
+          <h2 style={{
+            fontSize: '1.15rem',
+            fontWeight: 800,
+            color: '#000000',
+            letterSpacing: '0.02em',
+            margin: 0
+          }}>
+            .:: FORMULIR PENGAJUAN DATABASE DEALER ::.
+          </h2>
+        </div>
+
+        {/* Master Details Table */}
+        <div style={{ borderTop: '1px dotted #a1a1aa' }}>
+          {/* Row 1: NOMOR */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0.6rem 0',
+            borderBottom: '1px dotted #a1a1aa',
+            fontSize: '0.825rem'
+          }}>
+            <div style={{ width: '200px', fontWeight: 700, color: '#09090b', flexShrink: 0 }}>
+              NOMOR
+            </div>
+            <div style={{ fontWeight: 800, color: '#09090b', fontSize: '0.9rem' }}>
+              {nomorFpdb}
+            </div>
           </div>
-          <div style={{ fontSize: '0.825rem', color: '#1e3a8a' }}>
-            <strong>Informasi Mode Perubahan:</strong> Formulir ini telah terisi otomatis dengan data master dari SAP untuk{' '}
-            <strong>{existingDealer.name}</strong>. Anda dapat memperbarui limit kredit, alamat, kontak, atau lampiran dokumen pendukung.
+
+          {/* Row Optional if EDIT: UPDATE DATA SAP */}
+          {mode === 'EDIT' && existingDealer && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              padding: '0.6rem 0',
+              borderBottom: '1px dotted #a1a1aa',
+              fontSize: '0.825rem'
+            }}>
+              <div style={{ width: '200px', fontWeight: 700, color: '#09090b', flexShrink: 0 }}>
+                UPDATE DATA SAP
+              </div>
+              <div>
+                <div style={{
+                  backgroundColor: '#fef08a',
+                  padding: '0.25rem 0.65rem',
+                  display: 'inline-block',
+                  fontWeight: 800,
+                  fontSize: '0.825rem',
+                  color: '#09090b',
+                  lineHeight: 1.35
+                }}>
+                  <div>UPDATE CUSTOMER SAP</div>
+                  <div>{existingDealer.code} - {existingDealer.name}</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Row 2: KATEGORI DEALER */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0.6rem 0',
+            borderBottom: '1px dotted #a1a1aa',
+            fontSize: '0.825rem'
+          }}>
+            <div style={{ width: '200px', fontWeight: 700, color: '#09090b', flexShrink: 0 }}>
+              KATEGORI DEALER
+            </div>
+            <div style={{ flex: 1, maxWidth: '460px' }}>
+              <select
+                value={headerKategoriDealer}
+                onChange={(e) => setHeaderKategoriDealer(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.35rem 0.6rem',
+                  backgroundColor: '#f4f4f5',
+                  border: '1px solid #a1a1aa',
+                  borderRadius: '3px',
+                  fontSize: '0.8rem',
+                  color: '#09090b'
+                }}
+              >
+                <option value="-. TRADISIONAL">-. TRADISIONAL</option>
+                <option value="-. MODERN MARKET">-. MODERN MARKET</option>
+                <option value="-. PROJECT">-. PROJECT</option>
+                <option value="-. DISTRIBUTOR">-. DISTRIBUTOR</option>
+                <option value="-. KITCHENWARE & FURNITURE">-. KITCHENWARE & FURNITURE</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Row 3: CABANG */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0.6rem 0',
+            borderBottom: '1px dotted #a1a1aa',
+            fontSize: '0.825rem'
+          }}>
+            <div style={{ width: '200px', fontWeight: 700, color: '#09090b', flexShrink: 0 }}>
+              CABANG
+            </div>
+            <div style={{ flex: 1, maxWidth: '460px' }}>
+              <select
+                value={headerCabang}
+                onChange={(e) => setHeaderCabang(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.35rem 0.6rem',
+                  backgroundColor: '#f4f4f5',
+                  border: '1px solid #a1a1aa',
+                  borderRadius: '3px',
+                  fontSize: '0.8rem',
+                  color: '#09090b'
+                }}
+              >
+                <option value="-. SURABAYA">-. SURABAYA</option>
+                <option value="-. PUSAT">-. PUSAT</option>
+                <option value="-. BANDUNG">-. BANDUNG</option>
+                <option value="-. SEMARANG">-. SEMARANG</option>
+                <option value="-. MEDAN">-. MEDAN</option>
+                <option value="-. MAKASSAR">-. MAKASSAR</option>
+                <option value="-. BALI">-. BALI</option>
+                <option value="-. YOGYAKARTA">-. YOGYAKARTA</option>
+                <option value="-. PALEMBANG">-. PALEMBANG</option>
+                <option value="-. PEKANBARU">-. PEKANBARU</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Row 4: STATUS PENGAJUAN */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0.6rem 0',
+            borderBottom: '1px dotted #a1a1aa',
+            fontSize: '0.825rem'
+          }}>
+            <div style={{ width: '200px', fontWeight: 700, color: '#09090b', flexShrink: 0 }}>
+              STATUS PENGAJUAN
+            </div>
+            <div>
+              {mode === 'EDIT' ? (
+                <div>
+                  <div style={{ fontWeight: 800, color: '#09090b' }}>
+                    PENGAJUAN DATABASE DEALER DISELESAIKAN (STATUS <span style={{ color: '#15803d' }}>DISETUJUI</span>)
+                  </div>
+                  <div style={{ marginTop: '0.15rem' }}>
+                    <a
+                      href="#sync"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        alert('Sinkronisasi SAP: Database dealer telah tersinkronisasi ulang dengan master data SAP.');
+                      }}
+                      style={{ color: '#1d4ed8', textDecoration: 'underline', fontWeight: 700, fontSize: '0.785rem' }}
+                    >
+                      KLIK DISINI UNTUK SIKRONISASI ULANG DATA DEALER KE SAP
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <span style={{ fontWeight: 800, color: '#09090b' }}>DRAFT</span>
+              )}
+            </div>
+          </div>
+
+          {/* Row 5: PEMOHON */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            padding: '0.6rem 0',
+            borderBottom: '1px dotted #a1a1aa',
+            fontSize: '0.825rem'
+          }}>
+            <div style={{ width: '200px', fontWeight: 700, color: '#09090b', flexShrink: 0 }}>
+              PEMOHON
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, color: '#09090b', fontSize: '0.875rem', marginBottom: '0.35rem' }}>
+                {salesPersonName}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowSalesPicker(!showSalesPicker)}
+                  style={{
+                    padding: '0.2rem 0.6rem',
+                    backgroundColor: '#e4e4e7',
+                    border: '1px solid #71717a',
+                    borderRadius: '3px',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    color: '#09090b'
+                  }}
+                >
+                  Pilih Sales Person SAP
+                </button>
+                <span style={{ fontSize: '0.785rem', fontWeight: 700, color: '#09090b' }}>
+                  KODE SALES SAP {salesPersonNik}
+                </span>
+              </div>
+
+              {showSalesPicker && (
+                <div style={{
+                  marginTop: '0.5rem',
+                  padding: '0.65rem',
+                  backgroundColor: '#f4f4f5',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '4px',
+                  maxWidth: '420px'
+                }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.35rem', color: '#09090b' }}>
+                    Pilih Sales Person SAP Modena:
+                  </div>
+                  <select
+                    onChange={(e) => {
+                      const [n, k] = e.target.value.split('|');
+                      setSalesPersonName(n);
+                      setSalesPersonNik(k);
+                      setShowSalesPicker(false);
+                    }}
+                    defaultValue={`${salesPersonName}|${salesPersonNik}`}
+                    style={{
+                      width: '100%',
+                      padding: '0.4rem',
+                      fontSize: '0.8rem',
+                      borderRadius: '4px',
+                      border: '1px solid #a1a1aa'
+                    }}
+                  >
+                    <option value="IRWAN WIDJAYA TJANDRA|11744">IRWAN WIDJAYA TJANDRA (Kode SAP: 11744 - Surabaya)</option>
+                    <option value="YOGI DANIS FERMANA|10822">YOGI DANIS FERMANA (Kode SAP: 10822 - Pusat)</option>
+                    <option value="RIAN PRASETYA|11402">RIAN PRASETYA (Kode SAP: 11402 - Bandung)</option>
+                    <option value="DEDI KURNIAWAN|10219">DEDI KURNIAWAN (Kode SAP: 10219 - Jabar)</option>
+                    <option value="BUDI SANTOSO|11388">BUDI SANTOSO (Kode SAP: 11388 - Semarang)</option>
+                  </select>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Row 6: TOTAL NILAI (Like Gambar 2) */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            padding: '0.6rem 0',
+            borderBottom: '1px dotted #a1a1aa',
+            fontSize: '0.825rem'
+          }}>
+            <div style={{ width: '200px', fontWeight: 700, color: '#09090b', flexShrink: 0 }}>
+              TOTAL NILAI
+            </div>
+            <div>
+              <div style={{
+                backgroundColor: '#fef08a',
+                padding: '0.35rem 0.75rem',
+                display: 'inline-block',
+                fontSize: '0.825rem',
+                color: '#09090b',
+                lineHeight: 1.4
+              }}>
+                <div style={{ fontWeight: 800 }}>55.5 (MEDIUM RISK 2)</div>
+                <div style={{ fontWeight: 800 }}>
+                  REKOMENDASI LIMIT KREDIT : {requestedLimit ? requestedLimit : (existingDealer?.creditLimit || 45000000)}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Official NAVIGASI FORM Stepper Bar */}
       <div style={{
